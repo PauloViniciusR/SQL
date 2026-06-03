@@ -1,10 +1,10 @@
 # Estudos de SQL com Python
 
-Repositório com notebooks de estudo sobre consultas SQL usando Python, SQLite e Pandas. O projeto utiliza uma base fictícia de alunos para praticar leitura de dados, filtros, seleção de colunas, remoção de duplicidades e agregações.
+Repositório com notebooks de estudo sobre SQL aplicado à análise de dados usando Python, SQLite e Pandas. O material segue uma evolução prática: começa com consultas simples em uma única tabela, passa por filtros, agregações e condicionais, e termina com junções, `UNION` e simulação de `FULL JOIN`.
 
 ## Descrição para o GitHub
 
-Notebooks de estudo de SQL com Python, SQLite e Pandas usando uma base fictícia de alunos para praticar consultas, filtros e agregações.
+Notebooks de SQL com Python, SQLite e Pandas usando bases fictícias de alunos para praticar consultas, filtros, agregações, subqueries, joins, union e full join.
 
 ## Tecnologias utilizadas
 
@@ -20,21 +20,54 @@ Notebooks de estudo de SQL com Python, SQLite e Pandas usando uma base fictícia
 .
 ├── 1. sql.ipynb
 ├── 2. where.ipynb
-├── 3. groupyby.ipynb
-├── BaseDados.db
-└── BaseDados.xlsx
+├── 3. group by.ipynb
+├── 4. having.ipynb
+├── 5. case.ipynb
+├── 6. subquery.ipynb
+├── 7. in and like.ipynb
+├── 8. join.ipynb
+├── 9. join2.ipynb
+├── 10. union e fulljoin.ipynb
+├── README.md
+└── data
+    ├── BaseDados.db
+    ├── BaseDados.xlsx
+    ├── BaseDados2.db
+    ├── BaseDados2.xlsx
+    └── BaseDados3.db
 ```
 
-## Base de dados
+## Bases de dados
 
-Os arquivos `BaseDados.db` e `BaseDados.xlsx` representam uma base fictícia de alunos. Eles foram usados apenas para fins de estudo e prática de consultas SQL.
+As bases são fictícias e foram usadas apenas para fins de estudo.
 
-A tabela principal do banco SQLite é `dados`, com campos relacionados a:
+### `data/BaseDados.db`
+
+Banco usado nos notebooks iniciais. Possui a tabela `dados`, com informações consolidadas de alunos, acesso à plataforma e provas.
+
+Campos principais:
 
 - Identificação do aluno: `id_aluno`, `nome_aluno`, `cod_matricula`
 - Contato: `e-mail`
 - Acesso à plataforma: `acesso_plataforma`, `acesso_liberado`, `dias_ultimo_acesso`
 - Provas: `nr_prova`, `prova_feita`, `nota_prova`
+
+### `data/BaseDados2.db`
+
+Banco usado nos notebooks de `JOIN`. Possui dados separados em tabelas relacionais:
+
+- `alunos`: dados cadastrais dos alunos
+- `plataforma`: informações de acesso à plataforma
+- `provas`: provas liberadas e notas dos alunos
+- `base`: tabela consolidada de apoio
+
+### `data/BaseDados3.db`
+
+Banco usado no notebook de `UNION` e `FULL JOIN`. Possui:
+
+- `alunos`: alunos já existentes na base
+- `alunos_novos`: alunos adicionados após o início do mês
+- `plataforma`: informações de acesso à plataforma
 
 ## Assuntos estudados
 
@@ -42,116 +75,174 @@ A tabela principal do banco SQLite é `dados`, com campos relacionados a:
 
 Arquivo: `1. sql.ipynb`
 
-Este notebook apresenta o uso básico do SQLite com Python. O foco está em conectar ao banco de dados, executar consultas SQL e transformar os resultados em DataFrames do Pandas.
+Apresenta a conexão com SQLite usando Python, execução de consultas SQL e conversão dos resultados para DataFrames do Pandas.
 
 Principais pontos:
 
-- Criação de conexão com `sqlite3`
-- Criação de cursor para executar comandos SQL
-- Consulta completa com `SELECT *`
-- Leitura dos nomes das colunas pelo `cur.description`
-- Conversão dos resultados para `DataFrame`
+- Conexão com `sqlite3`
+- Criação de cursor
+- Consulta com `SELECT *`
 - Seleção de colunas específicas
-- Uso de alias para renomear colunas no resultado
-- Remoção de registros duplicados com `DISTINCT`
+- Uso de alias com `AS`
+- Remoção de duplicidades com `DISTINCT`
 - Criação da função `executa_sql()` para reutilizar consultas
 
-Exemplos de consultas trabalhadas:
-
-```sql
-SELECT * FROM dados;
-SELECT nome_aluno, cod_matricula FROM dados;
-SELECT nome_aluno, [e-mail] AS email FROM dados;
-SELECT DISTINCT nome_aluno, cod_matricula FROM dados;
-```
-
-### 2. Filtros com WHERE
+### 2. Filtros com `WHERE`
 
 Arquivo: `2. where.ipynb`
 
-Este notebook aprofunda o uso da cláusula `WHERE` para filtrar registros com base em condições. O objetivo é localizar alunos conforme regras de acesso e tempo desde o último acesso à plataforma.
+Trabalha filtros em registros com base em condições de acesso, liberação da plataforma e tempo desde o último acesso.
 
 Principais pontos:
 
 - Filtros com igualdade
-- Combinação de condições com `AND`
-- Combinação de condições com `OR`
-- Filtros numéricos com operadores como `<=` e `>`
-- Seleção de registros únicos com `DISTINCT`
-- Aplicação de alias em colunas com nomes especiais
-
-Exemplos de consultas trabalhadas:
-
-```sql
-SELECT *
-FROM dados
-WHERE acesso_plataforma = 0;
-
-SELECT DISTINCT nome_aluno, cod_matricula, [e-mail] AS email
-FROM dados
-WHERE acesso_plataforma = 0
-  AND dias_ultimo_acesso <= 2;
-
-SELECT DISTINCT nome_aluno, cod_matricula, [e-mail] AS email,
-       acesso_plataforma, dias_ultimo_acesso
-FROM dados
-WHERE acesso_plataforma = 0
-   OR dias_ultimo_acesso > 10;
-```
+- Condições com `AND` e `OR`
+- Operadores numéricos como `<=` e `>`
+- Seleção de registros únicos
+- Alias para colunas com caracteres especiais
 
 ### 3. Agregações e agrupamentos
 
-Arquivo: `3. groupyby.ipynb`
+Arquivo: `3. group by.ipynb`
 
-Este notebook trabalha consultas de resumo usando funções agregadoras e agrupamento de dados. O foco está em gerar indicadores a partir da tabela `dados`.
+Aplica funções agregadoras para gerar indicadores a partir dos dados.
 
 Principais pontos:
 
-- Cálculo de mínimo, máximo e média com `MIN`, `MAX` e `AVG`
-- Contagem de registros com `COUNT`
-- Agrupamento com `GROUP BY`
-- Ordenação de resultados com `ORDER BY`
+- `MIN`, `MAX` e `AVG`
+- `COUNT`
+- `GROUP BY`
+- `ORDER BY`
 - Filtro de valores nulos com `IS NOT NULL`
-- Combinação de filtros, agregações e ordenação
 
-Exemplos de consultas trabalhadas:
+### 4. Filtros em agregações com `HAVING`
 
-```sql
-SELECT MIN(dias_ultimo_acesso) AS Minimo,
-       MAX(dias_ultimo_acesso) AS Maximo,
-       AVG(dias_ultimo_acesso) AS Media
-FROM dados;
+Arquivo: `4. having.ipynb`
 
-SELECT nome_aluno, COUNT(id_aluno)
-FROM dados
-GROUP BY nome_aluno;
+Mostra a diferença entre filtrar linhas antes da agregação com `WHERE` e filtrar resultados agregados com `HAVING`.
 
-SELECT nome_aluno, AVG(id_aluno) AS Media
-FROM dados
-WHERE nota_prova IS NOT NULL
-GROUP BY nome_aluno
-ORDER BY AVG(id_aluno) DESC;
-```
+Principais pontos:
+
+- Ordem lógica de execução de uma consulta SQL
+- Agrupamento com filtros agregados
+- Limitação de resultados com `LIMIT`
+- Ordenação com `ASC` e `DESC`
+
+### 5. Condicionais com `CASE`
+
+Arquivo: `5. case.ipynb`
+
+Cria regras condicionais diretamente na consulta SQL para classificar alunos conforme notas e quantidade de provas.
+
+Principais pontos:
+
+- Estrutura `CASE WHEN THEN END`
+- Criação de colunas calculadas
+- Classificação de alunos por regra de negócio
+- Combinação de condições numéricas e agregações
+
+### 6. Subqueries
+
+Arquivo: `6. subquery.ipynb`
+
+Usa consultas internas para resolver problemas que dependem de resultados intermediários.
+
+Principais pontos:
+
+- Query dentro de query
+- Subqueries para cálculos e filtros
+- Reaproveitamento de lógicas criadas em consultas anteriores
+
+### 7. Filtros com `IN` e `LIKE`
+
+Arquivo: `7. in and like.ipynb`
+
+Apresenta filtros para listas de valores e padrões de texto.
+
+Principais pontos:
+
+- `IN` para verificar valores dentro de uma lista
+- `LIKE` para buscar padrões em strings
+- Filtros textuais com curingas
+
+### 8. Introdução a `JOIN`
+
+Arquivo: `8. join.ipynb`
+
+Introduz junções entre tabelas relacionais usando a base `BaseDados2.db`.
+
+Principais pontos:
+
+- Relação entre `alunos`, `plataforma` e `provas`
+- Comparação entre `JOIN` no SQL e `merge()` no Pandas
+- Junção por chave com `cod_matricula`
+- Uso de `INNER JOIN`, `LEFT JOIN` e variações
+
+### 9. Prática com `JOIN`
+
+Arquivo: `9. join2.ipynb`
+
+Aprofunda o uso de junções com consultas mais completas entre as tabelas da base relacional.
+
+Principais pontos:
+
+- Junções com múltiplas tabelas
+- Seleção de campos de tabelas diferentes
+- Uso de aliases para tabelas
+- Consolidação de dados cadastrais, acesso e provas
+
+### 10. `UNION` e `FULL JOIN`
+
+Arquivo: `10. union e fulljoin.ipynb`
+
+Trabalha união vertical de bases e simulação de `FULL JOIN` no SQLite.
+
+Principais pontos:
+
+- `UNION`
+- `UNION ALL`
+- Comparação entre união de linhas e junção de colunas
+- Simulação de `FULL JOIN` com combinação de `LEFT JOIN` e `UNION`
 
 ## Como executar
 
-1. Clone o repositório.
-2. Abra a pasta em um ambiente com Python e Jupyter Notebook.
-3. Instale as dependências principais, se necessário:
+1. Abra a pasta do projeto em um ambiente com Python e Jupyter Notebook.
+2. Instale as dependências principais, se necessário:
 
 ```bash
 pip install pandas jupyter
 ```
 
-4. Execute os notebooks na ordem:
+3. Execute os notebooks na ordem:
 
 ```text
 1. sql.ipynb
 2. where.ipynb
-3. groupyby.ipynb
+3. group by.ipynb
+4. having.ipynb
+5. case.ipynb
+6. subquery.ipynb
+7. in and like.ipynb
+8. join.ipynb
+9. join2.ipynb
+10. union e fulljoin.ipynb
+```
+
+## Observações importantes
+
+- Os bancos SQLite ficam na pasta `data`.
+- Os notebooks 8 e 9 usam `data/BaseDados2.db`.
+- O notebook 10 usa `data/BaseDados3.db`.
+- Caso um notebook antigo use um caminho sem `data/`, ajuste a conexão para o caminho correto.
+
+Exemplo:
+
+```python
+import sqlite3
+
+con = sqlite3.connect("data/BaseDados3.db")
 ```
 
 ## Objetivo do projeto
 
-O objetivo deste repositório é organizar os estudos iniciais de SQL aplicado à análise de dados com Python. A base fictícia permite praticar consultas de forma simples, mantendo o foco na lógica SQL e na integração com Pandas.
-
+Organizar os estudos iniciais de SQL aplicado à análise de dados com Python. As bases fictícias permitem praticar consultas de forma progressiva, mantendo o foco na lógica SQL, na modelagem relacional simples e na integração com Pandas.
