@@ -1,0 +1,3 @@
+# Bancos SQLite gerados localmente pelos notebooks.
+*.db
+*.db-journal
