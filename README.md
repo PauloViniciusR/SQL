@@ -52,10 +52,22 @@ Essa abordagem aproxima SQL, Pandas e pensamento analitico: antes de buscar resp
     │   ├── olist_sellers_dataset.csv
     │   └── product_category_name_translation.csv
     ├── data
-    │   └── banco.db
+    │   └── vendas_db.db
+    ├── png
+    │   ├── 01_ato1_preparacao_status_entrega.png
+    │   ├── 02_ato2_conflito_queda_nota.png
+    │   ├── 03_ato2_conflito_notas_ruins.png
+    │   ├── 04_ato3_solucao_faixas_atraso.png
+    │   └── 05_ato3_solucao_estados_prioritarios.png
+    ├── dicionario_sql.md
     └── notebook
-        ├── analise.ipynb
-        └── create_db.ipynb
+        ├── 1. analise.ipynb
+        ├── 2. create_db.ipynb
+        ├── 3. base.ipynb
+        ├── 4. base2.ipynb
+        ├── analise_base_Sql.ipynb
+        ├── atraso.ipynb
+        └── avaliacao.ipynb
 ```
 
 ## 1. Fundamentos de SQL com Python
@@ -93,9 +105,70 @@ Este projeto utiliza dados reais anonimizados da Olist, marketplace brasileiro c
 - clientes;
 - avaliacoes dos consumidores.
 
-O notebook `analise.ipynb` conduz uma exploracao guiada, partindo da leitura dos arquivos CSV, passando pela inspecao das estruturas e chegando a investigacoes mais especificas, como pedidos com multiplos itens, itens com mais de uma forma de pagamento e distribuicao das notas de avaliacao.
+O notebook `1. analise.ipynb` conduz uma exploracao guiada, partindo da leitura dos arquivos CSV, passando pela inspecao das estruturas e chegando a investigacoes mais especificas, como pedidos com multiplos itens, itens com mais de uma forma de pagamento e distribuicao das notas de avaliacao.
 
-O notebook `create_db.ipynb` registra praticas de criacao, insercao, atualizacao e remocao de dados em SQLite usando Python, reforcando a ponte entre DataFrames e bancos relacionais.
+O notebook `2. create_db.ipynb` registra praticas de criacao, insercao, atualizacao e remocao de dados em SQLite usando Python, reforcando a ponte entre DataFrames e bancos relacionais.
+
+O notebook principal para apresentacao executiva e o `analise_base_Sql.ipynb`. Ele consolida a analise de atraso de entrega e impacto na avaliacao do cliente usando SQL, gerando tabelas e graficos prontos para uma apresentacao em PPT.
+
+### Pergunta de negocio
+
+A logistica afirma que atraso nao parece ser um problema relevante porque, em media, os pedidos chegam cerca de 11 dias antes do prazo. A analise testa essa afirmacao com uma pergunta mais precisa:
+
+> Se a media geral e boa, ainda assim existem clientes impactados por atraso? E esse atraso muda a experiencia do cliente?
+
+### Estrutura do storytelling
+
+A apresentacao foi organizada em 3 atos:
+
+| Ato | Papel na historia | Mensagem principal |
+|---|---|---|
+| Preparacao | Mostrar o contexto e reconhecer o ponto da logistica. | A operacao parece boa na media: 91,89% dos pedidos chegam no prazo ou antes. |
+| Conflito | Mostrar o que a media esconde. | Existem 7.826 pedidos atrasados, e a nota media cai de 4,29 para 2,57 quando o atraso acontece. |
+| Solucao | Transformar evidencia em recomendacao. | O objetivo nao e prometer atraso zero, mas criar comunicacao e tratamento para pedidos com atraso ou risco de atraso. |
+
+### Principais achados
+
+| Indicador | Resultado | Interpretacao |
+|---|---:|---|
+| Pedidos entregues analisados | 96.470 | Base usada para avaliar prazo de entrega. |
+| Media geral vs prazo prometido | -11,18 dias | Na media, a entrega acontece antes do prazo. |
+| Pedidos atrasados | 7.826 | Existe um grupo relevante de clientes impactados. |
+| Percentual de pedidos atrasados | 8,11% | O problema nao e maioria, mas tem volume suficiente para acao. |
+| Nota media sem atraso | 4,29 | Entregas no prazo ou adiantadas preservam satisfacao. |
+| Nota media com atraso | 2,57 | O atraso derruba a experiencia percebida. |
+| Notas 1 ou 2 sem atraso | 9,23% | Baixo risco relativo de insatisfacao. |
+| Notas 1 ou 2 com atraso | 54,03% | Mais da metade dos clientes atrasados avalia mal. |
+
+### Graficos para PPT
+
+O notebook `analise_base_Sql.ipynb` gera imagens na pasta `Storytelling_sql/png`, ja com titulo narrativo e indicacao do ato da historia:
+
+| Arquivo | Uso no PPT |
+|---|---|
+| `01_ato1_preparacao_status_entrega.png` | Mostrar que a operacao entrega bem para a maioria. |
+| `02_ato2_conflito_queda_nota.png` | Mostrar a queda da nota media quando ha atraso. |
+| `03_ato2_conflito_notas_ruins.png` | Mostrar aumento de notas ruins em pedidos atrasados. |
+| `04_ato3_solucao_faixas_atraso.png` | Defender acao antes que o atraso entre em zona critica. |
+| `05_ato3_solucao_estados_prioritarios.png` | Sugerir foco inicial por regioes com maior percentual de atraso. |
+
+### Convencao importante
+
+Para evitar leitura invertida, a analise usa a seguinte regra:
+
+```sql
+julianday(order_delivered_customer_date) - julianday(order_estimated_delivery_date)
+```
+
+Nesse calculo:
+
+| Resultado | Significado |
+|---:|---|
+| Maior que 0 | Pedido atrasado. |
+| Igual a 0 | Pedido entregue na data prometida. |
+| Menor que 0 | Pedido entregue antes do prazo. |
+
+O arquivo `Storytelling_sql/dicionario_sql.md` documenta as principais funcoes SQL, regras de negocio, consultas e metricas validadas para essa narrativa.
 
 ## Pipeline analitico
 
@@ -134,7 +207,7 @@ source .venv/bin/activate
 3. Instale as dependencias principais:
 
 ```bash
-pip install pandas jupyter openpyxl
+pip install pandas matplotlib jupyter openpyxl
 ```
 
 4. Abra o Jupyter Notebook:
@@ -156,9 +229,12 @@ Sql_sintx/Base/7. in and like.ipynb
 Sql_sintx/Base/8. join.ipynb
 Sql_sintx/Base/9. join2.ipynb
 Sql_sintx/Base/10. union e fulljoin.ipynb
-Storytelling_sql/notebook/create_db.ipynb
-Storytelling_sql/notebook/analise.ipynb
+Storytelling_sql/notebook/2. create_db.ipynb
+Storytelling_sql/notebook/1. analise.ipynb
+Storytelling_sql/notebook/analise_base_Sql.ipynb
 ```
+
+Para gerar os graficos do storytelling, execute o notebook `Storytelling_sql/notebook/analise_base_Sql.ipynb` ate a secao `Graficos para o PPT`.
 
 ## Dados
 
@@ -173,3 +249,5 @@ Os dados do modulo `Storytelling_sql` sao arquivos CSV da Olist, anonimizados e 
 - Consultas agregadas devem separar bem filtros de linha (`WHERE`) e filtros de grupo (`HAVING`).
 - Pandas complementa SQL ao facilitar exploracao, validacao e exibicao dos resultados.
 - Storytelling em dados depende de sequencia: contexto, pergunta, evidencia e conclusao.
+- Medias gerais podem esconder grupos pequenos, mas com alto impacto na experiencia do cliente.
+- Para analise de datas, a convencao do sinal precisa ser explicita para evitar conclusoes invertidas.
